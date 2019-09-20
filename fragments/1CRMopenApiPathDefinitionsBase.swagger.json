@@ -1,0 +1,280 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "1CRM API",
+        "description": "1CRM API to list, read and write Data to 1CRM",
+        "version": "1.0.0"
+    },
+    "host": "demo.1crm.de",
+    "basePath": "/api.php",
+    "schemes": [
+        "https"
+    ],
+    "security": [
+        {
+            "basicAuth": []
+        }
+    ],
+    "securityDefinitions": {
+        "basicAuth": {
+            "type": "basic"
+        }
+    },
+    "paths": {
+        "/data/@{triggerBody()['text']}": {
+            "get": {
+                "operationId": "get@{triggerBody()['text']}List",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "type": "array",
+                        "explode": true,
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Array of field names to fetch. When omitted, a limited number of fields are returned, depending on model. Record ID is guaranteed to be returned, and for most models, name and/or _display fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "query_favorite",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Query favorites. If set, favorite field will be added to each result row, indicating whether the current user added the item to Favorites. Note that item is in favorites if and only if the value of favorite field is zero"
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter_text",
+                        "type": "string",
+                        "required": false,
+                        "description": "Generic search string. Fields involved in search depend on model"
+                    },
+                    {
+                        "in": "query",
+                        "name": "filters",
+                        "type": "array",
+                        "explode": true,
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Filters to apply. To get list of available filters for a model, use metadata. Format: filter[name]=SearchName (deepobject in OpenApi3)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "order",
+                        "type": "string",
+                        "required": false,
+                        "description": "Sort Order"
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Offset in the list to start retrieval from"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Limits number of records returned"
+                    }
+                ],
+                "description": "Get @{triggerBody()['text']} List",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with @{triggerBody()['text']} Array and information of total count",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "total_count": {
+                                    "type": "integer"
+                                },
+                                "records": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/@{triggerBody()['text']}"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "get @{triggerBody()['text']} List from 1CRM"
+            },
+            "post": {
+                "operationId": "create@{triggerBody()['text']}",
+                "parameters": [
+                    {
+                        "description": "@{triggerBody()['text']} object to be added to 1CRM",
+                        "in": "body",
+                        "name": "@{triggerBody()['text']}",
+                        "required": true,
+                        "schema": {
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/@{triggerBody()['text']}"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "description": "Create a @{triggerBody()['text']}",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with @{triggerBody()['text']} Array and information of total count",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "description": "ID of the newly created @{triggerBody()['text']}"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "create new @{triggerBody()['text']}"
+            }
+        },
+        "/data/@{triggerBody()['text']}/{id}": {
+            "get": {
+                "operationId": "getSingle@{triggerBody()['text']}",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be fetched"
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "type": "array",
+                        "explode": true,
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Array of field names to fetch. When omitted, all available fields are returned."
+                    }
+                ],
+                "description": "Get single @{triggerBody()['text']} Object",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with @{triggerBody()['text']} record",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "record": {
+                                    "type": "object",
+                                    "items": {
+                                        "$ref": "#/definitions/@{triggerBody()['text']}"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "get @{triggerBody()['text']} List from 1CRM"
+            },
+            "patch": {
+                "operationId": "updateSingle@{triggerBody()['text']}",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be updated"
+                    },
+                    {
+                        "description": "@{triggerBody()['text']} object to be updated in 1CRM",
+                        "in": "body",
+                        "name": "@{triggerBody()['text']}",
+                        "required": true,
+                        "schema": {
+                            "required": [
+                                "data"
+                            ],
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/@{triggerBody()['text']}"
+                                },
+                                "create": {
+                                    "type": "boolean",
+                                    "description": "If true, record will be created if it does not exist"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "description": "Get single @{triggerBody()['text']} Object",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "always true",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "result": {
+                                    "type": "boolean",
+                                    "description": "always true"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "update @{triggerBody()['text']} in 1CRM"
+            },
+            "delete": {
+                "operationId": "deleteSingle@{triggerBody()['text']}",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be deleted"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "true if deleted",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "result": {
+                                    "type": "boolean",
+                                    "description": "true if deleted"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "delete @{triggerBody()['text']} in 1CRM"
+            }
+        }
+    },
+    "definitions": {}
+}

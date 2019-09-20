@@ -1,0 +1,562 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "1CRM API",
+    "description": "1CRM API to list, read and write Data to 1CRM",
+    "version": "1.0.0"
+  },
+  "host": "demo.1crm.de",
+  "basePath": "/api.php",
+  "schemes": [
+    "https"
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "securityDefinitions": {
+    "basicAuth": {
+      "type": "basic"
+    }
+  },
+  "paths": {
+    "/data/Account": {
+      "get": {
+        "operationId": "getAccountList",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fields",
+            "type": "array",
+            "explode": true,
+            "items": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Array of field names to fetch. When omitted, a limited number of fields are returned, depending on model. Record ID is guaranteed to be returned, and for most models, name and/or _display fields."
+          },
+          {
+            "in": "query",
+            "name": "query_favorite",
+            "type": "boolean",
+            "required": false,
+            "description": "Query favorites. If set, favorite field will be added to each result row, indicating whether the current user added the item to Favorites. Note that item is in favorites if and only if the value of favorite field is zero"
+          },
+          {
+            "in": "query",
+            "name": "filter_text",
+            "type": "string",
+            "required": false,
+            "description": "Generic search string. Fields involved in search depend on model"
+          },
+          {
+            "in": "query",
+            "name": "filters",
+            "type": "array",
+            "explode": true,
+            "items": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Filters to apply. To get list of available filters for a model, use metadata. Format: filter[name]=SearchName (deepobject in OpenApi3)"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "type": "string",
+            "required": false,
+            "description": "Sort Order"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "Offset in the list to start retrieval from"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Limits number of records returned"
+          }
+        ],
+        "description": "Get Account List",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "a json Object with Account Array and information of total count",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "total_count": {
+                  "type": "integer"
+                },
+                "records": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Account"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "get Account List from 1CRM"
+      },
+      "post": {
+        "operationId": "createAccount",
+        "parameters": [
+          {
+            "description": "Account object to be added to 1CRM",
+            "in": "body",
+            "name": "Account",
+            "required": true,
+            "schema": {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/Account"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "description": "Create a Account",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "a json Object with Account Array and information of total count",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "ID of the newly created Account"
+                }
+              }
+            }
+          }
+        },
+        "summary": "create new Account"
+      }
+    },
+    "/data/Account/{id}": {
+      "get": {
+        "operationId": "getSingleAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "description": "The id of the record to be fetched"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "type": "array",
+            "required": false,
+            "description": "Array of field names to fetch. When omitted, all available fields are returned."
+          }
+        ],
+        "description": "Get single Account Object",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "a json Object with Account record",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "record": {
+                  "type": "object",
+                  "items": {
+                    "$ref": "#/definitions/Account"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "get Account List from 1CRM"
+      },
+      "patch": {
+        "operationId": "updateSingleAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "description": "The id of the record to be updated"
+          },
+          {
+            "description": "Account object to be updated in 1CRM",
+            "in": "body",
+            "name": "Account",
+            "required": true,
+            "schema": {
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/Account"
+                },
+                "create": {
+                  "type": "boolean",
+                  "description": "If true, record will be created if it does not exist"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "description": "Get single Account Object",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "always true",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "description": "always true"
+                }
+              }
+            }
+          }
+        },
+        "summary": "update Account in 1CRM"
+      },
+      "delete": {
+        "operationId": "deleteSingleAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "description": "The id of the record to be deleted"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "true if deleted",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "description": "true if deleted"
+                }
+              }
+            }
+          }
+        },
+        "summary": "delete Account in 1CRM"
+      }
+    }
+  },
+  "definitions": {
+    "Account": {
+      "type": "object",
+      "description": "1CRM Account Entity",
+      "required": [
+        "assigned_user",
+        "name",
+        "invalid_email",
+        "email_opt_out"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "date_entered": {
+          "type": "string"
+        },
+        "date_modified": {
+          "type": "string"
+        },
+        "modified_user": {
+          "type": "string"
+        },
+        "modified_user_id": {
+          "type": "string"
+        },
+        "assigned_user": {
+          "type": "string"
+        },
+        "assigned_user_id": {
+          "type": "string"
+        },
+        "created_by_user": {
+          "type": "string"
+        },
+        "created_by": {
+          "type": "string"
+        },
+        "deleted": {
+          "type": "boolean"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "currency_id": {
+          "type": "string"
+        },
+        "exchange_rate": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "default_pricebook": {
+          "type": "string"
+        },
+        "default_pricebook_id": {
+          "type": "string"
+        },
+        "member_of": {
+          "type": "string"
+        },
+        "parent_id": {
+          "type": "string"
+        },
+        "account_type": {
+          "type": "string"
+        },
+        "industry": {
+          "type": "string"
+        },
+        "annual_revenue": {
+          "type": "string"
+        },
+        "phone_fax": {
+          "type": "string"
+        },
+        "phone_fax__raw": {
+          "type": "string"
+        },
+        "billing_address_street": {
+          "type": "string"
+        },
+        "billing_address_city": {
+          "type": "string"
+        },
+        "billing_address_state": {
+          "type": "string"
+        },
+        "billing_address_postalcode": {
+          "type": "string"
+        },
+        "billing_address_country": {
+          "type": "string"
+        },
+        "billing_address_statecode": {
+          "type": "string"
+        },
+        "billing_address_countrycode": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "string"
+        },
+        "phone_office": {
+          "type": "string"
+        },
+        "phone_office__raw": {
+          "type": "string"
+        },
+        "phone_alternate": {
+          "type": "string"
+        },
+        "phone_alternate__raw": {
+          "type": "string"
+        },
+        "email1": {
+          "type": "string"
+        },
+        "email2": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        },
+        "ownership": {
+          "type": "string"
+        },
+        "employees": {
+          "type": "integer"
+        },
+        "sic_code": {
+          "type": "string"
+        },
+        "ticker_symbol": {
+          "type": "string"
+        },
+        "shipping_address_street": {
+          "type": "string"
+        },
+        "shipping_address_city": {
+          "type": "string"
+        },
+        "shipping_address_state": {
+          "type": "string"
+        },
+        "shipping_address_postalcode": {
+          "type": "string"
+        },
+        "shipping_address_country": {
+          "type": "string"
+        },
+        "shipping_address_statecode": {
+          "type": "string"
+        },
+        "shipping_address_countrycode": {
+          "type": "string"
+        },
+        "is_supplier": {
+          "type": "boolean"
+        },
+        "account_popups": {
+          "type": "boolean"
+        },
+        "account_popup": {
+          "type": "string"
+        },
+        "sales_popup": {
+          "type": "string"
+        },
+        "service_popup": {
+          "type": "string"
+        },
+        "balance": {
+          "type": "number"
+        },
+        "balance_payable": {
+          "type": "number"
+        },
+        "credit_limit": {
+          "type": "number"
+        },
+        "credit_limit_usd": {
+          "type": "number"
+        },
+        "purchase_credit_limit": {
+          "type": "number"
+        },
+        "purchase_credit_limit_usd": {
+          "type": "number"
+        },
+        "default_terms": {
+          "type": "string"
+        },
+        "default_purchase_terms": {
+          "type": "string"
+        },
+        "default_discount": {
+          "type": "string"
+        },
+        "default_discount_id": {
+          "type": "string"
+        },
+        "default_purchase_discount": {
+          "type": "string"
+        },
+        "default_purchase_discount_id": {
+          "type": "string"
+        },
+        "default_shipper": {
+          "type": "string"
+        },
+        "default_shipper_id": {
+          "type": "string"
+        },
+        "default_purchase_shipper": {
+          "type": "string"
+        },
+        "default_purchase_shipper_id": {
+          "type": "string"
+        },
+        "last_activity_date": {
+          "type": "string"
+        },
+        "tax_information": {
+          "type": "string"
+        },
+        "partner": {
+          "type": "string"
+        },
+        "partner_id": {
+          "type": "string"
+        },
+        "invalid_email": {
+          "type": "boolean"
+        },
+        "email_opt_out": {
+          "type": "boolean"
+        },
+        "temperature": {
+          "type": "string"
+        },
+        "first_invoice": {
+          "type": "string"
+        },
+        "first_invoice_id": {
+          "type": "string"
+        },
+        "last_invoice": {
+          "type": "string"
+        },
+        "last_invoice_id": {
+          "type": "string"
+        },
+        "tax_code": {
+          "type": "string"
+        },
+        "tax_code_id": {
+          "type": "string"
+        },
+        "primary_contact": {
+          "type": "string"
+        },
+        "primary_contact_id": {
+          "type": "string"
+        },
+        "photo": {
+          "type": "string"
+        },
+        "photo_filename": {
+          "type": "string"
+        },
+        "photo_thumb": {
+          "type": "string"
+        },
+        "invoice_as": {
+          "type": "string"
+        },
+        "stripe_customer_id": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

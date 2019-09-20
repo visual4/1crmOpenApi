@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "capabilities": [],
+    "connectionParameters": {
+      "password": {
+        "type": "securestring",
+        "uiDefinition": {
+          "constraints": {
+            "clearText": false,
+            "required": "true",
+            "tabIndex": 3
+          },
+          "description": "\"Kennwort\" f\u00fcr diese API",
+          "displayName": "Kennwort",
+          "tooltip": "Stellen Sie \"Kennwort\" bereit."
+        }
+      },
+      "username": {
+        "type": "securestring",
+        "uiDefinition": {
+          "constraints": {
+            "clearText": true,
+            "required": "true",
+            "tabIndex": 2
+          },
+          "description": "\"Benutzername\" f\u00fcr diese API",
+          "displayName": "Benutzername",
+          "tooltip": "Stellen Sie \"Benutzername\" bereit."
+        }
+      },
+      "crmUrl": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "Specify URL of your 1CRM without https:// and trailing slash",
+          "displayName": "1CRM URL",
+          "tooltip": "Provide Your 1CRM URL without https:// and trailing slash"
+        }
+      }
+    },
+    "iconBrandColor": "#007ee5",
+    "policyTemplateInstances": [
+      {
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('crmUrl')/api.php/meta/fields"
+        },
+        "templateId": "dynamichosturl",
+        "title": "URL to 1CRM"
+      }
+    ]
+  }
+}

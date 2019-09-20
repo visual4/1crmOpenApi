@@ -1,0 +1,101 @@
+{
+  "basePath": "/api.php/meta/fields/",
+  "consumes": [],
+  "definitions": {
+    "Field": {
+      "type": "object",
+      "properties": {
+        "vname": {
+          "type": "string",
+          "example": "the Fieldname for display"
+        },
+        "type": {
+          "type": "string",
+          "example": "varchar"
+        },
+        "required": {
+          "type": "boolean"                        
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string",
+          "example": "fieldname"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {              
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "host": "demo.1crm.de",
+  "info": {
+    "description": "Get Meta information about fields from 1CRM",
+    "title": "1CRM Meta Connector",
+    "version": "1.0"
+  },
+  "parameters": {},
+  "paths": {
+    "/{module}": {
+      "get": {
+        "operationId": "MetaFieldsModule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "module",
+            "type": "string",
+            "required": true,
+            "description": "The module to get Information from",
+            "enum": ["Account", "Contact", "aCase", "Note", "Opportunity"]
+          }
+        ],
+        "description": "Get Field information for a Module from 1CRM",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "a json Object with Module Field description",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fields": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/definitions/Field"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "getFields for Account"
+      }
+    }
+  },
+  "produces": [],
+  "responses": {},
+  "schemes": [
+    "https"
+  ],
+  "security": [],
+  "securityDefinitions": {
+    "undefined": {
+      "type": "basic"
+    }
+  },
+  "swagger": "2.0",
+  "tags": []
+}
