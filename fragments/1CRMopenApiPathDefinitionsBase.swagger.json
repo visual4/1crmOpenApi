@@ -28,8 +28,8 @@
                     {
                         "in": "query",
                         "name": "fields",
+                        "x-ms-summary": "The fields to fetch",
                         "type": "array",
-                        "explode": true,
                         "items": {
                             "type": "string"
                         },
@@ -40,6 +40,7 @@
                         "in": "query",
                         "name": "query_favorite",
                         "type": "boolean",
+                        "x-ms-visibility": "advanced",
                         "required": false,
                         "description": "Query favorites. If set, favorite field will be added to each result row, indicating whether the current user added the item to Favorites. Note that item is in favorites if and only if the value of favorite field is zero"
                     },
@@ -53,8 +54,8 @@
                     {
                         "in": "query",
                         "name": "filters",
+                        "x-ms-visibility": "advanced",
                         "type": "array",
-                        "explode": true,
                         "items": {
                             "type": "string"
                         },
@@ -65,6 +66,7 @@
                         "in": "query",
                         "name": "order",
                         "type": "string",
+                        "x-ms-visibility": "advanced",
                         "required": false,
                         "description": "Sort Order"
                     },
@@ -72,6 +74,7 @@
                         "in": "query",
                         "name": "offset",
                         "type": "integer",
+                        "x-ms-visibility": "advanced",
                         "required": false,
                         "description": "Offset in the list to start retrieval from"
                     },
@@ -79,6 +82,7 @@
                         "in": "query",
                         "name": "limit",
                         "type": "integer",
+                        "x-ms-visibility": "advanced",
                         "required": false,
                         "description": "Limits number of records returned"
                     }
@@ -162,7 +166,6 @@
                         "in": "query",
                         "name": "fields",
                         "type": "array",
-                        "explode": true,
                         "items": {
                             "type": "string"
                         },
@@ -181,16 +184,13 @@
                             "type": "object",
                             "properties": {
                                 "record": {
-                                    "type": "object",
-                                    "items": {
-                                        "$ref": "#/definitions/@{triggerBody()['text']}"
-                                    }
+                                    "$ref": "#/definitions/@{triggerBody()['text']}"
                                 }
                             }
                         }
                     }
                 },
-                "summary": "get @{triggerBody()['text']} List from 1CRM"
+                "summary": "get single @{triggerBody()['text']} Object from 1CRM"
             },
             "patch": {
                 "operationId": "updateSingle@{triggerBody()['text']}",
@@ -273,6 +273,110 @@
                     }
                 },
                 "summary": "delete @{triggerBody()['text']} in 1CRM"
+            }
+        },
+        "/webhooks": {
+            "x-ms-notification-content": {
+                "schema": {
+                    "type": "object",
+                    "$ref": "#/definitions/@{triggerBody()['text']}"
+                },
+                "description": "The @{triggerBody()['text']} fields"
+            },
+            "post": {
+                "responses": {},
+                "x-ms-trigger": "single",
+                "summary": "When an @{triggerBody()['text']} is created or updated",
+                "description": "This operation triggers when an @{triggerBody()['text']} is created  or updated in 1CRM",
+                "operationId": "createUpdate@{triggerBody()['text']}Webhook",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "description": "Event Type",
+                                    "title": "Event Type",
+                                    "enum": [
+                                        "create",
+                                        "update",
+                                        "create_update"
+                                    ]
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "description": "url",
+                                    "x-ms-notification-url": true,
+                                    "title": "",
+                                    "x-ms-visibility": "internal"
+                                },
+                                "model": {
+                                    "type": "string",
+                                    "description": "1CRM Object Model",
+                                    "title": "Model",
+                                    "default": "@{triggerBody()['text']}",
+                                    "x-ms-visibility": "internal"
+                                },
+                                "filters": {
+                                    "type": "object",
+                                    "description": "1CRM Webhook Filter Object, see developer documentation",
+                                    "properties": {
+                                        "glue": {
+                                            "type": "string",
+                                            "example": "or"
+                                        },
+                                        "conditions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "field": {
+                                                        "type": "string",
+                                                        "example": "first_name"
+                                                    },
+                                                    "filter": {
+                                                        "type": "string",
+                                                        "example": "eq"
+                                                    },
+                                                    "value": {
+                                                        "type": "string",
+                                                        "example": "John"
+                                                    },
+                                                    "when": {
+                                                        "type": "string",
+                                                        "example": "current_value"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "default": {
+                                        "glue": "or",
+                                        "conditions": [
+                                            {
+                                                "field": "deleted",
+                                                "filter": "is_false",
+                                                "value": "0",
+                                                "when": "current_value"
+                                            }
+                                        ]
+                                    },
+                                    "x-ms-visibility": "advanced"
+                                }
+                            },
+                            "required": [
+                                "url",
+                                "model",
+                                "type",
+                                "filters"
+                            ]
+                        }
+                    }
+                ]
             }
         }
     },
