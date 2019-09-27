@@ -105,7 +105,7 @@
                                     }
                                 },
                                 "method": "get",
-                                "path": "/@{encodeURIComponent('Account')}",
+                                "path": "/@{encodeURIComponent(triggerBody()['text'])}",
                                 "authentication": {
                                     "type": "Raw",
                                     "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
@@ -674,8 +674,45 @@
                             },
                             "type": "Compose",
                             "inputs": "@setProperty(variables('openApiBase'), 'definitions', outputs('definitionsObjectBauen'))"
+                        },
+                        "Datei_erstellen": {
+                            "runAfter": {
+                                "definitionsInOpenApiBaseEinfuegen": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "metadata": {
+                                "flowSystemMetadata": {
+                                    "swaggerOperationId": "CreateFile"
+                                }
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$connections']['onedriveforbusiness']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "body": "@outputs('definitionsInOpenApiBaseEinfuegen')",
+                                "path": "/datasets/default/files",
+                                "queries": {
+                                    "folderPath": "/vorlagen/OpenAPI",
+                                    "name": "1crm@{triggerBody()['text']}.swagger.json"
+                                },
+                                "authentication": {
+                                    "type": "Raw",
+                                    "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                                }
+                            },
+                            "runtimeConfiguration": {
+                                "contentTransfer": {
+                                    "transferMode": "Chunked"
+                                }
+                            }
                         }
-                    }
+                    },
+                    "description": "This Flow lets you enter a 1CRM module name. It will then save an OpenAPI json file to your OneDrive account. This file can be used with swagger to build arbitary clients, or with Microsoft flow to create a new 1CRM connector."
                 },
                 "parameters": {},
                 "runtimeConfiguration": {
