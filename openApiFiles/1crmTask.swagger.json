@@ -1,0 +1,502 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "1CRM API",
+        "description": "1CRM API to list, read and write Data to 1CRM",
+        "version": "1.0.0"
+    },
+    "host": "demo.1crm.de",
+    "basePath": "/api.php",
+    "schemes": [
+        "https"
+    ],
+    "security": [
+        {
+            "basicAuth": []
+        }
+    ],
+    "securityDefinitions": {
+        "basicAuth": {
+            "type": "basic"
+        }
+    },
+    "paths": {
+        "/webhooks": {
+            "x-ms-notification-content": {
+                "schema": {
+                    "type": "object",
+                    "$ref": "#/definitions/Task"
+                },
+                "description": "The Task fields"
+            },
+            "post": {
+                "responses": {},
+                "x-ms-trigger": "single",
+                "summary": "When an Task is created or updated",
+                "description": "This operation triggers when an Task is created  or updated in 1CRM",
+                "operationId": "createUpdateTaskWebhook",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "description": "Event Type",
+                                    "title": "Event Type",
+                                    "enum": [
+                                        "create",
+                                        "update",
+                                        "create_update"
+                                    ]
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "description": "url",
+                                    "x-ms-notification-url": true,
+                                    "title": "",
+                                    "x-ms-visibility": "internal"
+                                },
+                                "model": {
+                                    "type": "string",
+                                    "description": "1CRM Object Model",
+                                    "title": "Model",
+                                    "default": "Task",
+                                    "x-ms-visibility": "internal"
+                                },
+                                "filters": {
+                                    "type": "object",
+                                    "description": "1CRM Webhook Filter Object, see developer documentation",
+                                    "properties": {
+                                        "glue": {
+                                            "type": "string",
+                                            "example": "or"
+                                        },
+                                        "conditions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "field": {
+                                                        "type": "string",
+                                                        "example": "first_name"
+                                                    },
+                                                    "filter": {
+                                                        "type": "string",
+                                                        "example": "eq"
+                                                    },
+                                                    "value": {
+                                                        "type": "string",
+                                                        "example": "John"
+                                                    },
+                                                    "when": {
+                                                        "type": "string",
+                                                        "example": "current_value"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "default": {
+                                        "glue": "or",
+                                        "conditions": [
+                                            {
+                                                "field": "deleted",
+                                                "filter": "is_false",
+                                                "value": "0",
+                                                "when": "current_value"
+                                            }
+                                        ]
+                                    },
+                                    "x-ms-visibility": "advanced"
+                                }
+                            },
+                            "required": [
+                                "url",
+                                "model",
+                                "type",
+                                "filters"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "/data/Task": {
+            "get": {
+                "operationId": "getTaskList",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "x-ms-summary": "The fields to fetch",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Array of field names to fetch. When omitted, a limited number of fields are returned, depending on model. Record ID is guaranteed to be returned, and for most models, name and/or _display fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "query_favorite",
+                        "type": "boolean",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Query favorites. If set, favorite field will be added to each result row, indicating whether the current user added the item to Favorites. Note that item is in favorites if and only if the value of favorite field is zero"
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter_text",
+                        "type": "string",
+                        "required": false,
+                        "description": "Generic search string. Fields involved in search depend on model"
+                    },
+                    {
+                        "in": "query",
+                        "name": "filters",
+                        "x-ms-visibility": "advanced",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Filters to apply. To get list of available filters for a model, use metadata. Format: filter[name]=SearchName (deepobject in OpenApi3)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "order",
+                        "type": "string",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Sort Order"
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "type": "integer",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Offset in the list to start retrieval from"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "type": "integer",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Limits number of records returned"
+                    }
+                ],
+                "description": "Get Task List",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with Task Array and information of total count",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "total_count": {
+                                    "type": "integer"
+                                },
+                                "records": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Task"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "get Task List from 1CRM"
+            },
+            "post": {
+                "operationId": "createTask",
+                "parameters": [
+                    {
+                        "description": "Task object to be added to 1CRM",
+                        "in": "body",
+                        "name": "Task",
+                        "required": true,
+                        "schema": {
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/Task"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "description": "Create a Task",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with Task Array and information of total count",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "description": "ID of the newly created Task"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "create new Task"
+            }
+        },
+        "/data/Task/{id}": {
+            "get": {
+                "operationId": "getSingleTask",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be fetched"
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Array of field names to fetch. When omitted, all available fields are returned."
+                    }
+                ],
+                "description": "Get single Task Object",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with Task record",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "record": {
+                                    "$ref": "#/definitions/Task"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "get single Task Object from 1CRM"
+            },
+            "patch": {
+                "operationId": "updateSingleTask",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be updated"
+                    },
+                    {
+                        "description": "Task object to be updated in 1CRM",
+                        "in": "body",
+                        "name": "Task",
+                        "required": true,
+                        "schema": {
+                            "required": [
+                                "data"
+                            ],
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/Task"
+                                },
+                                "create": {
+                                    "type": "boolean",
+                                    "description": "If true, record will be created if it does not exist"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "description": "Get single Task Object",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "always true",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "result": {
+                                    "type": "boolean",
+                                    "description": "always true"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "update Task in 1CRM"
+            },
+            "delete": {
+                "operationId": "deleteSingleTask",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be deleted"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "true if deleted",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "result": {
+                                    "type": "boolean",
+                                    "description": "true if deleted"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "delete Task in 1CRM"
+            }
+        }
+    },
+    "definitions": {
+        "Task": {
+            "type": "object",
+            "description": "1CRM Task Entity",
+            "required": [
+                "assigned_user",
+                "name",
+                "status",
+                "priority"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "date_entered": {
+                    "type": "string"
+                },
+                "date_modified": {
+                    "type": "string"
+                },
+                "assigned_user": {
+                    "type": "string"
+                },
+                "assigned_user_id": {
+                    "type": "string"
+                },
+                "modified_user": {
+                    "type": "string"
+                },
+                "modified_user_id": {
+                    "type": "string"
+                },
+                "created_by_user": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "boolean"
+                },
+                "effort_estim": {
+                    "type": "string"
+                },
+                "effort_estim_unit": {
+                    "type": "string"
+                },
+                "effort_actual": {
+                    "type": "string"
+                },
+                "effort_actual_unit": {
+                    "type": "string"
+                },
+                "is_private": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "date_due": {
+                    "type": "string"
+                },
+                "date_start": {
+                    "type": "string"
+                },
+                "parent_type": {
+                    "type": "string"
+                },
+                "parent": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "account": {
+                    "type": "string"
+                },
+                "account_id": {
+                    "type": "string"
+                },
+                "contact": {
+                    "type": "string"
+                },
+                "contact_id": {
+                    "type": "string"
+                },
+                "contact_phone": {
+                    "type": "string"
+                },
+                "contact_email": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "reminder_time": {
+                    "type": "string"
+                },
+                "email_reminder_time": {
+                    "type": "string"
+                },
+                "vcal_size": {
+                    "type": "integer"
+                },
+                "vcal": {
+                    "type": "string"
+                },
+                "vcal_uri": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

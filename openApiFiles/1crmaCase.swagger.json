@@ -1,0 +1,535 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "1CRM API",
+        "description": "1CRM API to list, read and write Data to 1CRM",
+        "version": "1.0.0"
+    },
+    "host": "demo.1crm.de",
+    "basePath": "/api.php",
+    "schemes": [
+        "https"
+    ],
+    "security": [
+        {
+            "basicAuth": []
+        }
+    ],
+    "securityDefinitions": {
+        "basicAuth": {
+            "type": "basic"
+        }
+    },
+    "paths": {
+        "/webhooks": {
+            "x-ms-notification-content": {
+                "schema": {
+                    "type": "object",
+                    "$ref": "#/definitions/aCase"
+                },
+                "description": "The aCase fields"
+            },
+            "post": {
+                "responses": {},
+                "x-ms-trigger": "single",
+                "summary": "When an aCase is created or updated",
+                "description": "This operation triggers when an aCase is created  or updated in 1CRM",
+                "operationId": "createUpdateaCaseWebhook",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "description": "Event Type",
+                                    "title": "Event Type",
+                                    "enum": [
+                                        "create",
+                                        "update",
+                                        "create_update"
+                                    ]
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "description": "url",
+                                    "x-ms-notification-url": true,
+                                    "title": "",
+                                    "x-ms-visibility": "internal"
+                                },
+                                "model": {
+                                    "type": "string",
+                                    "description": "1CRM Object Model",
+                                    "title": "Model",
+                                    "default": "aCase",
+                                    "x-ms-visibility": "internal"
+                                },
+                                "filters": {
+                                    "type": "object",
+                                    "description": "1CRM Webhook Filter Object, see developer documentation",
+                                    "properties": {
+                                        "glue": {
+                                            "type": "string",
+                                            "example": "or"
+                                        },
+                                        "conditions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "field": {
+                                                        "type": "string",
+                                                        "example": "first_name"
+                                                    },
+                                                    "filter": {
+                                                        "type": "string",
+                                                        "example": "eq"
+                                                    },
+                                                    "value": {
+                                                        "type": "string",
+                                                        "example": "John"
+                                                    },
+                                                    "when": {
+                                                        "type": "string",
+                                                        "example": "current_value"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "default": {
+                                        "glue": "or",
+                                        "conditions": [
+                                            {
+                                                "field": "deleted",
+                                                "filter": "is_false",
+                                                "value": "0",
+                                                "when": "current_value"
+                                            }
+                                        ]
+                                    },
+                                    "x-ms-visibility": "advanced"
+                                }
+                            },
+                            "required": [
+                                "url",
+                                "model",
+                                "type",
+                                "filters"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "/data/aCase": {
+            "get": {
+                "operationId": "getaCaseList",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "x-ms-summary": "The fields to fetch",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Array of field names to fetch. When omitted, a limited number of fields are returned, depending on model. Record ID is guaranteed to be returned, and for most models, name and/or _display fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "query_favorite",
+                        "type": "boolean",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Query favorites. If set, favorite field will be added to each result row, indicating whether the current user added the item to Favorites. Note that item is in favorites if and only if the value of favorite field is zero"
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter_text",
+                        "type": "string",
+                        "required": false,
+                        "description": "Generic search string. Fields involved in search depend on model"
+                    },
+                    {
+                        "in": "query",
+                        "name": "filters",
+                        "x-ms-visibility": "advanced",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Filters to apply. To get list of available filters for a model, use metadata. Format: filter[name]=SearchName (deepobject in OpenApi3)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "order",
+                        "type": "string",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Sort Order"
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "type": "integer",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Offset in the list to start retrieval from"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "type": "integer",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Limits number of records returned"
+                    }
+                ],
+                "description": "Get aCase List",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with aCase Array and information of total count",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "total_count": {
+                                    "type": "integer"
+                                },
+                                "records": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/aCase"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "get aCase List from 1CRM"
+            },
+            "post": {
+                "operationId": "createaCase",
+                "parameters": [
+                    {
+                        "description": "aCase object to be added to 1CRM",
+                        "in": "body",
+                        "name": "aCase",
+                        "required": true,
+                        "schema": {
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/aCase"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "description": "Create a aCase",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with aCase Array and information of total count",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "description": "ID of the newly created aCase"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "create new aCase"
+            }
+        },
+        "/data/aCase/{id}": {
+            "get": {
+                "operationId": "getSingleaCase",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be fetched"
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Array of field names to fetch. When omitted, all available fields are returned."
+                    }
+                ],
+                "description": "Get single aCase Object",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with aCase record",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "record": {
+                                    "$ref": "#/definitions/aCase"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "get single aCase Object from 1CRM"
+            },
+            "patch": {
+                "operationId": "updateSingleaCase",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be updated"
+                    },
+                    {
+                        "description": "aCase object to be updated in 1CRM",
+                        "in": "body",
+                        "name": "aCase",
+                        "required": true,
+                        "schema": {
+                            "required": [
+                                "data"
+                            ],
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/aCase"
+                                },
+                                "create": {
+                                    "type": "boolean",
+                                    "description": "If true, record will be created if it does not exist"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "description": "Get single aCase Object",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "always true",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "result": {
+                                    "type": "boolean",
+                                    "description": "always true"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "update aCase in 1CRM"
+            },
+            "delete": {
+                "operationId": "deleteSingleaCase",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be deleted"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "true if deleted",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "result": {
+                                    "type": "boolean",
+                                    "description": "true if deleted"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "delete aCase in 1CRM"
+            }
+        }
+    },
+    "definitions": {
+        "aCase": {
+            "type": "object",
+            "description": "1CRM aCase Entity",
+            "required": [
+                "assigned_user",
+                "name",
+                "status",
+                "priority"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "date_entered": {
+                    "type": "string"
+                },
+                "date_modified": {
+                    "type": "string"
+                },
+                "modified_user": {
+                    "type": "string"
+                },
+                "modified_user_id": {
+                    "type": "string"
+                },
+                "assigned_user": {
+                    "type": "string"
+                },
+                "assigned_user_id": {
+                    "type": "string"
+                },
+                "created_by_user": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "boolean"
+                },
+                "case_number": {
+                    "type": "string"
+                },
+                "effort_actual": {
+                    "type": "number"
+                },
+                "effort_actual_unit": {
+                    "type": "string"
+                },
+                "travel_time": {
+                    "type": "string"
+                },
+                "travel_time_unit": {
+                    "type": "string"
+                },
+                "arrival_time": {
+                    "type": "string"
+                },
+                "cust_req_no": {
+                    "type": "string"
+                },
+                "cust_contact": {
+                    "type": "string"
+                },
+                "cust_contact_id": {
+                    "type": "string"
+                },
+                "cust_phone_no": {
+                    "type": "string"
+                },
+                "cust_phone_no__raw": {
+                    "type": "string"
+                },
+                "date_closed": {
+                    "type": "string"
+                },
+                "date_billed": {
+                    "type": "string"
+                },
+                "vendor_rma_no": {
+                    "type": "string"
+                },
+                "vendor_svcreq_no": {
+                    "type": "string"
+                },
+                "contract": {
+                    "type": "string"
+                },
+                "contract_id": {
+                    "type": "string"
+                },
+                "asset": {
+                    "type": "string"
+                },
+                "asset_id": {
+                    "type": "string"
+                },
+                "asset_serial_no": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "account": {
+                    "type": "string"
+                },
+                "account_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "resolution": {
+                    "type": "string"
+                },
+                "age": {
+                    "type": "string"
+                },
+                "default_booking_category": {
+                    "type": "string"
+                },
+                "default_booking_category_id": {
+                    "type": "string"
+                },
+                "last_activity_date": {
+                    "type": "string"
+                },
+                "inactivity_start_date": {
+                    "type": "string"
+                },
+                "inactivity_warn_date": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

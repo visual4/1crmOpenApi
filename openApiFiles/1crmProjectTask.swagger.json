@@ -1,0 +1,496 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "1CRM API",
+        "description": "1CRM API to list, read and write Data to 1CRM",
+        "version": "1.0.0"
+    },
+    "host": "demo.1crm.de",
+    "basePath": "/api.php",
+    "schemes": [
+        "https"
+    ],
+    "security": [
+        {
+            "basicAuth": []
+        }
+    ],
+    "securityDefinitions": {
+        "basicAuth": {
+            "type": "basic"
+        }
+    },
+    "paths": {
+        "/webhooks": {
+            "x-ms-notification-content": {
+                "schema": {
+                    "type": "object",
+                    "$ref": "#/definitions/ProjectTask"
+                },
+                "description": "The ProjectTask fields"
+            },
+            "post": {
+                "responses": {},
+                "x-ms-trigger": "single",
+                "summary": "When an ProjectTask is created or updated",
+                "description": "This operation triggers when an ProjectTask is created  or updated in 1CRM",
+                "operationId": "createUpdateProjectTaskWebhook",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "description": "Event Type",
+                                    "title": "Event Type",
+                                    "enum": [
+                                        "create",
+                                        "update",
+                                        "create_update"
+                                    ]
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "description": "url",
+                                    "x-ms-notification-url": true,
+                                    "title": "",
+                                    "x-ms-visibility": "internal"
+                                },
+                                "model": {
+                                    "type": "string",
+                                    "description": "1CRM Object Model",
+                                    "title": "Model",
+                                    "default": "ProjectTask",
+                                    "x-ms-visibility": "internal"
+                                },
+                                "filters": {
+                                    "type": "object",
+                                    "description": "1CRM Webhook Filter Object, see developer documentation",
+                                    "properties": {
+                                        "glue": {
+                                            "type": "string",
+                                            "example": "or"
+                                        },
+                                        "conditions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "field": {
+                                                        "type": "string",
+                                                        "example": "first_name"
+                                                    },
+                                                    "filter": {
+                                                        "type": "string",
+                                                        "example": "eq"
+                                                    },
+                                                    "value": {
+                                                        "type": "string",
+                                                        "example": "John"
+                                                    },
+                                                    "when": {
+                                                        "type": "string",
+                                                        "example": "current_value"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "default": {
+                                        "glue": "or",
+                                        "conditions": [
+                                            {
+                                                "field": "deleted",
+                                                "filter": "is_false",
+                                                "value": "0",
+                                                "when": "current_value"
+                                            }
+                                        ]
+                                    },
+                                    "x-ms-visibility": "advanced"
+                                }
+                            },
+                            "required": [
+                                "url",
+                                "model",
+                                "type",
+                                "filters"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "/data/ProjectTask": {
+            "get": {
+                "operationId": "getProjectTaskList",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "x-ms-summary": "The fields to fetch",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Array of field names to fetch. When omitted, a limited number of fields are returned, depending on model. Record ID is guaranteed to be returned, and for most models, name and/or _display fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "query_favorite",
+                        "type": "boolean",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Query favorites. If set, favorite field will be added to each result row, indicating whether the current user added the item to Favorites. Note that item is in favorites if and only if the value of favorite field is zero"
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter_text",
+                        "type": "string",
+                        "required": false,
+                        "description": "Generic search string. Fields involved in search depend on model"
+                    },
+                    {
+                        "in": "query",
+                        "name": "filters",
+                        "x-ms-visibility": "advanced",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Filters to apply. To get list of available filters for a model, use metadata. Format: filter[name]=SearchName (deepobject in OpenApi3)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "order",
+                        "type": "string",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Sort Order"
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "type": "integer",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Offset in the list to start retrieval from"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "type": "integer",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Limits number of records returned"
+                    }
+                ],
+                "description": "Get ProjectTask List",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with ProjectTask Array and information of total count",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "total_count": {
+                                    "type": "integer"
+                                },
+                                "records": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ProjectTask"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "get ProjectTask List from 1CRM"
+            },
+            "post": {
+                "operationId": "createProjectTask",
+                "parameters": [
+                    {
+                        "description": "ProjectTask object to be added to 1CRM",
+                        "in": "body",
+                        "name": "ProjectTask",
+                        "required": true,
+                        "schema": {
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/ProjectTask"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "description": "Create a ProjectTask",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with ProjectTask Array and information of total count",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "description": "ID of the newly created ProjectTask"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "create new ProjectTask"
+            }
+        },
+        "/data/ProjectTask/{id}": {
+            "get": {
+                "operationId": "getSingleProjectTask",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be fetched"
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Array of field names to fetch. When omitted, all available fields are returned."
+                    }
+                ],
+                "description": "Get single ProjectTask Object",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with ProjectTask record",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "record": {
+                                    "$ref": "#/definitions/ProjectTask"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "get single ProjectTask Object from 1CRM"
+            },
+            "patch": {
+                "operationId": "updateSingleProjectTask",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be updated"
+                    },
+                    {
+                        "description": "ProjectTask object to be updated in 1CRM",
+                        "in": "body",
+                        "name": "ProjectTask",
+                        "required": true,
+                        "schema": {
+                            "required": [
+                                "data"
+                            ],
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/ProjectTask"
+                                },
+                                "create": {
+                                    "type": "boolean",
+                                    "description": "If true, record will be created if it does not exist"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "description": "Get single ProjectTask Object",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "always true",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "result": {
+                                    "type": "boolean",
+                                    "description": "always true"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "update ProjectTask in 1CRM"
+            },
+            "delete": {
+                "operationId": "deleteSingleProjectTask",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be deleted"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "true if deleted",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "result": {
+                                    "type": "boolean",
+                                    "description": "true if deleted"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "delete ProjectTask in 1CRM"
+            }
+        }
+    },
+    "definitions": {
+        "ProjectTask": {
+            "type": "object",
+            "description": "1CRM ProjectTask Entity",
+            "required": [
+                "assigned_user",
+                "portal_flag",
+                "name",
+                "status",
+                "date_due",
+                "date_start",
+                "parent"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "date_entered": {
+                    "type": "string"
+                },
+                "date_modified": {
+                    "type": "string"
+                },
+                "assigned_user": {
+                    "type": "string"
+                },
+                "assigned_user_id": {
+                    "type": "string"
+                },
+                "modified_user": {
+                    "type": "string"
+                },
+                "modified_user_id": {
+                    "type": "string"
+                },
+                "created_by_user": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "currency_id": {
+                    "type": "string"
+                },
+                "exchange_rate": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "boolean"
+                },
+                "portal_flag": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "date_due": {
+                    "type": "string"
+                },
+                "date_start": {
+                    "type": "string"
+                },
+                "include_weekends": {
+                    "type": "boolean"
+                },
+                "parent": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "order_number": {
+                    "type": "integer"
+                },
+                "task_number": {
+                    "type": "integer"
+                },
+                "depends_on": {
+                    "type": "string"
+                },
+                "depends_on_id": {
+                    "type": "string"
+                },
+                "dependency_type": {
+                    "type": "string"
+                },
+                "milestone_flag": {
+                    "type": "boolean"
+                },
+                "percent_complete": {
+                    "type": "string"
+                },
+                "default_booking_category": {
+                    "type": "string"
+                },
+                "default_booking_category_id": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

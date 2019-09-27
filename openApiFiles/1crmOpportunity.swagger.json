@@ -1,0 +1,503 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "1CRM API",
+        "description": "1CRM API to list, read and write Data to 1CRM",
+        "version": "1.0.0"
+    },
+    "host": "demo.1crm.de",
+    "basePath": "/api.php",
+    "schemes": [
+        "https"
+    ],
+    "security": [
+        {
+            "basicAuth": []
+        }
+    ],
+    "securityDefinitions": {
+        "basicAuth": {
+            "type": "basic"
+        }
+    },
+    "paths": {
+        "/webhooks": {
+            "x-ms-notification-content": {
+                "schema": {
+                    "type": "object",
+                    "$ref": "#/definitions/Opportunity"
+                },
+                "description": "The Opportunity fields"
+            },
+            "post": {
+                "responses": {},
+                "x-ms-trigger": "single",
+                "summary": "When an Opportunity is created or updated",
+                "description": "This operation triggers when an Opportunity is created  or updated in 1CRM",
+                "operationId": "createUpdateOpportunityWebhook",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "description": "Event Type",
+                                    "title": "Event Type",
+                                    "enum": [
+                                        "create",
+                                        "update",
+                                        "create_update"
+                                    ]
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "description": "url",
+                                    "x-ms-notification-url": true,
+                                    "title": "",
+                                    "x-ms-visibility": "internal"
+                                },
+                                "model": {
+                                    "type": "string",
+                                    "description": "1CRM Object Model",
+                                    "title": "Model",
+                                    "default": "Opportunity",
+                                    "x-ms-visibility": "internal"
+                                },
+                                "filters": {
+                                    "type": "object",
+                                    "description": "1CRM Webhook Filter Object, see developer documentation",
+                                    "properties": {
+                                        "glue": {
+                                            "type": "string",
+                                            "example": "or"
+                                        },
+                                        "conditions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "field": {
+                                                        "type": "string",
+                                                        "example": "first_name"
+                                                    },
+                                                    "filter": {
+                                                        "type": "string",
+                                                        "example": "eq"
+                                                    },
+                                                    "value": {
+                                                        "type": "string",
+                                                        "example": "John"
+                                                    },
+                                                    "when": {
+                                                        "type": "string",
+                                                        "example": "current_value"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "default": {
+                                        "glue": "or",
+                                        "conditions": [
+                                            {
+                                                "field": "deleted",
+                                                "filter": "is_false",
+                                                "value": "0",
+                                                "when": "current_value"
+                                            }
+                                        ]
+                                    },
+                                    "x-ms-visibility": "advanced"
+                                }
+                            },
+                            "required": [
+                                "url",
+                                "model",
+                                "type",
+                                "filters"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "/data/Opportunity": {
+            "get": {
+                "operationId": "getOpportunityList",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "x-ms-summary": "The fields to fetch",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Array of field names to fetch. When omitted, a limited number of fields are returned, depending on model. Record ID is guaranteed to be returned, and for most models, name and/or _display fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "query_favorite",
+                        "type": "boolean",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Query favorites. If set, favorite field will be added to each result row, indicating whether the current user added the item to Favorites. Note that item is in favorites if and only if the value of favorite field is zero"
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter_text",
+                        "type": "string",
+                        "required": false,
+                        "description": "Generic search string. Fields involved in search depend on model"
+                    },
+                    {
+                        "in": "query",
+                        "name": "filters",
+                        "x-ms-visibility": "advanced",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Filters to apply. To get list of available filters for a model, use metadata. Format: filter[name]=SearchName (deepobject in OpenApi3)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "order",
+                        "type": "string",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Sort Order"
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "type": "integer",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Offset in the list to start retrieval from"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "type": "integer",
+                        "x-ms-visibility": "advanced",
+                        "required": false,
+                        "description": "Limits number of records returned"
+                    }
+                ],
+                "description": "Get Opportunity List",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with Opportunity Array and information of total count",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "total_count": {
+                                    "type": "integer"
+                                },
+                                "records": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Opportunity"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "get Opportunity List from 1CRM"
+            },
+            "post": {
+                "operationId": "createOpportunity",
+                "parameters": [
+                    {
+                        "description": "Opportunity object to be added to 1CRM",
+                        "in": "body",
+                        "name": "Opportunity",
+                        "required": true,
+                        "schema": {
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/Opportunity"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "description": "Create a Opportunity",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with Opportunity Array and information of total count",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "description": "ID of the newly created Opportunity"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "create new Opportunity"
+            }
+        },
+        "/data/Opportunity/{id}": {
+            "get": {
+                "operationId": "getSingleOpportunity",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be fetched"
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "Array of field names to fetch. When omitted, all available fields are returned."
+                    }
+                ],
+                "description": "Get single Opportunity Object",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "a json Object with Opportunity record",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "record": {
+                                    "$ref": "#/definitions/Opportunity"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "get single Opportunity Object from 1CRM"
+            },
+            "patch": {
+                "operationId": "updateSingleOpportunity",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be updated"
+                    },
+                    {
+                        "description": "Opportunity object to be updated in 1CRM",
+                        "in": "body",
+                        "name": "Opportunity",
+                        "required": true,
+                        "schema": {
+                            "required": [
+                                "data"
+                            ],
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/Opportunity"
+                                },
+                                "create": {
+                                    "type": "boolean",
+                                    "description": "If true, record will be created if it does not exist"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "description": "Get single Opportunity Object",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "always true",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "result": {
+                                    "type": "boolean",
+                                    "description": "always true"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "update Opportunity in 1CRM"
+            },
+            "delete": {
+                "operationId": "deleteSingleOpportunity",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "required": true,
+                        "description": "The id of the record to be deleted"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "true if deleted",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "result": {
+                                    "type": "boolean",
+                                    "description": "true if deleted"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "delete Opportunity in 1CRM"
+            }
+        }
+    },
+    "definitions": {
+        "Opportunity": {
+            "type": "object",
+            "description": "1CRM Opportunity Entity",
+            "required": [
+                "assigned_user",
+                "currency",
+                "exchange_rate",
+                "opportunities_number",
+                "forecast_category",
+                "name",
+                "account",
+                "amount",
+                "amount_usdollar",
+                "date_closed",
+                "sales_stage"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "date_entered": {
+                    "type": "string"
+                },
+                "date_modified": {
+                    "type": "string"
+                },
+                "modified_user": {
+                    "type": "string"
+                },
+                "modified_user_id": {
+                    "type": "string"
+                },
+                "assigned_user": {
+                    "type": "string"
+                },
+                "assigned_user_id": {
+                    "type": "string"
+                },
+                "created_by_user": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "boolean"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "currency_id": {
+                    "type": "string"
+                },
+                "exchange_rate": {
+                    "type": "string"
+                },
+                "prefix": {
+                    "type": "string"
+                },
+                "opportunities_number": {
+                    "type": "string"
+                },
+                "full_number": {
+                    "type": "string"
+                },
+                "forecast_category": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "opportunity_type": {
+                    "type": "string"
+                },
+                "account": {
+                    "type": "string"
+                },
+                "account_id": {
+                    "type": "string"
+                },
+                "campaign": {
+                    "type": "string"
+                },
+                "campaign_id": {
+                    "type": "string"
+                },
+                "lead_source": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "number"
+                },
+                "amount_usdollar": {
+                    "type": "number"
+                },
+                "date_closed": {
+                    "type": "string"
+                },
+                "next_step": {
+                    "type": "string"
+                },
+                "sales_stage": {
+                    "type": "string"
+                },
+                "probability": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "partner": {
+                    "type": "string"
+                },
+                "partner_id": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
