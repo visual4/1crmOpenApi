@@ -30,7 +30,12 @@
                 "description": "The Account fields"
             },
             "post": {
-                "responses": {},
+                "responses": {
+                    "200": {
+                        "description": "Webhook Created",
+                        
+                    }
+                },
                 "x-ms-trigger": "single",
                 "summary": "When an Account is created or updated",
                 "description": "This operation triggers when an Account is created  or updated in 1CRM",
